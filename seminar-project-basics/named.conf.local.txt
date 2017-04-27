@@ -1,0 +1,6 @@
+zone "your.domain" {
+	type master;
+	file "/etc/bind/db.your.domain";
+};
+
+# you might want to add reverse dns zone here

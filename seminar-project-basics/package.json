@@ -1,0 +1,15 @@
+{
+  "name": "cucf",
+  "version": "1.0.0",
+  "description": "Description of Your Project",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.13.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Your Name",
+  "license": "ISC"
+}

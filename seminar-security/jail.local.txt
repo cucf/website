@@ -1,0 +1,16 @@
+# how long a ban lasts
+bantime  = 600
+
+# these rules say, if 5 bad attempts in 600 seconds, ban the ip address
+findtime  = 600
+maxretry = 5
+
+# add this entire section, it's for DOS prevention. basically says, if 100 requests in 50 seconds, ban IP for 600 seconds
+[http-dos]
+enabled = true
+port = http,https
+filter = http-dos
+maxretry = 100
+findtime = 50
+bantime = 600
+action = iptables[name=HTTP, port=http, protocol=tcp]

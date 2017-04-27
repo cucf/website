@@ -1,0 +1,131 @@
+<!DOCTYPE html><html><head><meta charset='utf-8'><style>body { font-family: "Courier New", Courier, monospace; }</style></head><body>
+<br>
+<br>$> sudo apt-get update
+<br>
+<br><h3 style="color:blue">Install & Configure Bind:</h3>
+<br>
+<br># if you are working with a sub domain name given to you by cucf, skip this part and go to the Apache section.
+<br>
+<br>$> sudo apt-get install -y bind9
+<br>$> sudo apt-get install -y dnsutils
+<br>
+<br>$> sudo cp etc/bind/db.local etc/bind/<b>your domain</b>
+<br>$> sudo vim etc/bind/db.<b>your domain</b>
+<br>
+<br># edit bind configuration, should look like: <a href="db.your.domain.txt" target="_blank">cucomputerforge.com/s1/db.your.domain</a>
+<br>
+<br># replace "your.domain" , "your.dns.url." , "email.your.domain." , "your ip4 address" , "your ip6 address"
+<br>
+<br>$> sudo vim etc/bind/named.conf.local
+<br>
+<br># edit zone configuration, should look like: <a href="named.conf.local.txt" target="_blank">cucomputerforge.com/s1/named.conf.local</a>
+<br>
+<br># replace "your.domain"
+<br>
+<br>$> service bind9 restart
+<br>
+<br><h3 style="color:blue">Install & Configure Apache:</h3>
+<br>
+<br>$> sudo apt-get install -y apache2
+<br>
+<br>$> sudo mkdir /var/www/forge
+<br>$> sudo chown -R www-data:www-data /var/www
+<br>$> sudo chmod -R 755 /var/www
+<br>
+<br>$> sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/forge.conf
+<br>
+<br>$> sudo vim /etc/apache2/sites-available/forge.conf
+<br>
+<br># edit site configuration, should look like: <a href="forge.conf" target="_blank">cucomputerforge.com/s1/forge.conf</a>
+<br>
+<br>$> sudo a2dissite 000-default.conf 
+<br>$> sudo a2ensite forge.conf 
+<br>
+<br>$> sudo a2enmod proxy
+<br>$> sudo a2enmod proxy_http
+<br>$> sudo service apache2 restart
+<br>
+<br>$> sudo vim /var/www/forge/index.html
+<br>
+<br># add anything inside of index.html
+<br>
+<br>$> sudo apt-get install -y python-minimal
+<br>$> cd /var/www/forge
+<br>$> python2 -m SimpleHTTPServer 2000
+<br>
+<br># to stop python, press ctrl-c 
+<br>
+<br>$> rm index.html
+<br>
+<br><h3 style="color:blue">Install & Configure MongoDB:</h3>
+<br>
+<br># MongoDB installation changes frequently. Check this for updated instructions: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
+<br>
+<br>$> sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+<br>
+<br>$> echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+<br>
+<br>$> sudo apt-get update
+<br>
+<br>$> sudo apt-get install -y mongodb-org
+<br>
+<br>$> sudo service mongod start
+<br>
+<br>$> mongo
+<br>
+<br>mongo> use forge
+<br>mongo> show dbs
+<br>mongo> db.createCollection(“data”)
+<br>mongo> show dbs
+<br>mongo> show collections
+<br>mongo> exit
+<br>
+<br><h3 style="color:blue">Install & Configure NodeJS:</h3>
+<br>
+<br>$> sudo apt-get install -y npm
+<br>
+<br>$> sudo wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh | bash
+<br>
+<br>$> export NVM_DIR="$HOME/.nvm"
+<br>$> [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+<br>
+<br>$> sudo nvm install node
+<br>
+<br>$> cd /var/www
+<br>
+<br>$> sudo vim package.json
+<br>
+<br># paste in contents from <a href="package.json" target="_blank">cucomputerforge.com/s1/package.json</a>
+<br>
+<br>$> npm install
+<br>
+<br>$> npm install mongodb --save
+<br>
+<br>$> less package.json
+<br>
+<br># press ‘q’ to exit
+<br>
+<br>$> sudo vim server.js
+<br>
+<br># write in contents from <a href="server.js" target="_blank">cucomputerforge.com/s1/server.js</a>
+<br>
+<br>$> sudo vim forge/client.js
+<br>
+<br># write in contents from <a href="client.js" target="_blank">cucomputerforge.com/s1/client.js</a>
+<br>
+<br>$> tmux
+<br>
+<br>$> node server.js
+<br>
+<br># to exit, press ctrl-b d
+<br>
+<br># at this point, go to your domain to test the site
+<br>
+<br>$> tmux list-sessions
+<br>
+<br>$> tmux attach -t 0
+<br>
+<br># stop node with ctrl-c & exit tmux. Done!
+<br>
+<br></body></html>
+<br>

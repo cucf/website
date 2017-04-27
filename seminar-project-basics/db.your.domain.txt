@@ -1,0 +1,15 @@
+;
+; BIND data file for your.domain
+;
+$TTL    604800
+@       IN      SOA		your.dns.url. 	email.your.domain. (
+						1         		; Serial
+						604800      	; Refresh
+						86400       	; Retry
+						2419200     	; Expire
+						604800 )    	; Negative Cache TTL
+;
+@       IN      NS      your.dns.url.
+@       IN      A       your ip4 address
+@       IN      AAAA    your ip6 address
+www     IN      CNAME   your.domain.
