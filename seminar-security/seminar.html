@@ -1,209 +1,212 @@
-<!DOCTYPE html><html><head><meta charset='utf-8'><style>body { font-family: "Courier New", Courier, monospace; }</style></head><body>
-<br>
-<br>$> apt-get update
-<br>
-<br><h3 style="color:blue">Install Fail2Ban:</h3>
-<br>
-<br><i>Fail2Ban is software that helps prevent Brute Force attacks and DOS (denial of service) attacks.</i>
-<br>
-<br><i>A Brute Force attack is when someone sends millions of passwords in attempt to log in as a user. Preventing this is a matter of locking a user's account after a number of failed log in attempts.</i>
-<br>
-<br><i>A DOS attack, is when someone sends you way more requests than your server can handle, causing your server to drop requests, including legitimate ones, so regular people can't use your site/service.</i>
-<br>
-<br>$> apt-get install fail2ban
-<br>$> cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-<br>$> vim /etc/fail2ban/jail.local
-<br>
-<br># edit fail2ban configuration, edit & add these entries: <a href="jail.local.txt" target="_blank">cucomputerforge.com/s2/jail.local</a>
-<br>
-<br>$> vim /etc/fail2ban/filter.d/http-dos.conf
-<br>
-<br># paste in these contents: <a href="http-dos.conf" target="_blank">cucomputerforge.com/s2/http-dos.conf</a>
-<br>
-<br>$> service fail2ban restart
-<br>
-<br><h3 style="color:blue">What About DDOS?</h3>
-<br>
-<br><i>A DDOS (distributed denial of service, notice the extra "D") is the same as DOS except now the requests are coming from multiple IP addresses instead of one.</i>
-<br>
-<br><i>DDOS attacks are rarer for small companies. To make a DDOS attack, means you need control of thousands if not millions of internet connected devices. So if you get hit by one, I would say "you pissed off the wrong person/people". Mitigating a DDOS attack is usually only something a large company can do as it requires some expensive purchases, such as having enough bandwidth to sustain the attack, site cacheing, DNS redirects, and a lot of rules and filters.</i>
-<br>
-<br><i>A basic example of a rule that would be implemented in stopping a DDOS attack is this: Each request from the DDOS could be similar to one another if not the same, with only the IP address being different. So, you create a server that all traffic goes through that checks the requests. When you suddenly get a bunch that look the same, you blacklist them, but allow others to go to your final web server. Of course, the DDOS could use an algorithm to generate random looking requests, and you're off to add another filter.</i>
-<br>
-<br><i>Here's a recent example of a DDOS attack: <a href="https://www.forbes.com/sites/thomasbrewster/2016/09/25/brian-krebs-overwatch-ovh-smashed-by-largest-ddos-attacks-ever/#375ad2195899" target="blank">A DDOS attack using IP cameras as an IoT</a></i>
-<br>
-<br><h3 style="color:blue">Secure Apache:</h3>
-<br>
-<br>$> vim /etc/apache2/apache2.conf
-<br>
-<br># edit apache configuration, edit these entries: <a href="apache2.conf" target="_blank">cucomputerforge.com/s2/apache2.conf</a>
-<br>
-<br>$> vim conf-enabled/security.conf
-<br>
-<br># edit security configuration, edit these entries: <a href="security.conf" target="_blank">cucomputerforge.com/s2/security.conf</a>
-<br>
-<br><h3 style="color:blue">Add TLS (HTTPS):</h3>
-<br>
-<br># information about this can be found here: <a href="https://certbot.eff.org/" target="_blank">https://certbot.eff.org/</a>
-<br>
-<br>$> apt-get install python-letsencrypt-apache
-<br>
-<br>$> letsencrypt --apache -d <b>your.domain</b>
-<br>
-<br>$> crontab -e
-<br>
-<br># edit cron configuration, should look like: <a href="cron.txt" target="_blank">cucomputerforge.com/s2/cron.txt</a>
-<br>
-<br><h3 style="color:blue">Secure Mongo:</h3>
-<br>
-<br>$> mongo
-<br>
-<br>mongo> use admin
-<br>mongo> db.createUser({user: "root", pwd: "<b>your password</b>", roles: [ "root" ]})
-<br>mongo> exit
-<br>
-<br>$> service mongod stop
-<br>
-<br>$> vim /etc/mongod.conf
-<br>
-<br># edit mongo configuration, change "security" to this: <a href="mongod.conf" target="_blank">cucomputerforge.com/s2/mongod.conf</a>
-<br>
-<br>$> service mongod restart
-<br>
-<br>$> mongo -u "root" -p "<b>your password</b>" --authenticationDatabase "admin"
-<br>
-<br>mongo> exit
-<br>
-<br><h3 style="color:blue">Let's Hack Ourselves (Cross-Site Scripting XSS):</h3>
-<br>
-<br>$> node /var/www/server.js
-<br>
-<br># Go to your website form and type in the following:
-<br>
-<br>&ltscript&gtalert("XSS Attack!");&lt/script&gt
-<br>
-<br># The page should have reloaded, and now you receive a javascript alert box. Every person who visits your page will see it. A malicious user can thus insert unwanted javascript code for the purpose of gathering user data.
-<br>
-<br><h3 style="color:blue">What Is Session Hijacking?</h3>
-<br>
-<br><i>When you stay logged in on a website, the website knows it's still you by checking a "cookie" (a piece of data stored on your browser), for an authentication key. An XSS attack can try to steal your cookie and pretend like they're you.</i>
-<br>
-<br><i>This is fairly easy to avoid today. If you use session cookies, make sure that the cookie is marked with "HttpOnly". That allows only server code to access the cookie. No client side javascript code can get to it.</i>
-<br>
-<br><i>With expressjs, setting an HttpOnly cookies looks like this: response.cookie.httpOnly</i>
-<br>
-<br><h3 style="color:blue">What Is SQL Injection?</h3>
-<br>
-<br><i>Just like a user can insert malicious javascript code, SQL injection is the insertion of malicious SQL code, usually to mine for data.</i>
-<br>
-<br><i>SQL drivers, the library you install to connect between your server and the database, come with functions to remove any potential SQL injection code. </i>
-<br>
-<br><i>In Node, the mysql driver, comes with the function connection.escape(string)</i>
-<br>
-<br><h3 style="color:blue">Preventing Cross-Site Scripting (XSS)</h3>
-<br>
-<br><i>Preventing XSS is way more complicated than just removing &ltscript&gt tags. Checkout wikipedia for examples: <a href="https://en.wikipedia.org/wiki/Cross-site_scripting#Preventive_measures" target="_blank">wiki</a>. We'll use a package to prevent XSS.</i>
-<br>
-<br>$> cd /var/www
-<br>$> npm install sanitize-html
-<br>
-<br>$> vim server.js
-<br>
-<br># edit server code, specifically the routes.post function: <a href="server.js" target="_blank">cucomputerforge.com/s2/server.js</a>
-<br>
-<br>$> mongo
-<br>
-<br>mongo> use data
-<br>mongo> db.posts.drop();
-<br>mongo> exit
-<br>
-<br># restart your nodejs server
-<br>
-<br>$> node /var/www/server.js
-<br>
-<br># now go back to your website & try posting this:
-<br>
-<br>&ltscript&gtalert("XSS Attack!");&lt/script&gt and something else
-<br>
-<br># if all went well, you should only see "and something else" by your mongo _id. sanitize-html should have removed the the &ltscript&gt tags and everything between them.
-<br>
-<br><h3 style="color:blue">Preventing Overflow Attacks</h3>
-<br>
-<br><i>an overflow attack is where someone sends you so much data that the memory of your computer runs out and crashes. When a person makes a request for your server, that request has headers and a body. That body can be as big as the user wants and your server will just keep receiving the body data until it crashes.</i>
-<br>
-<br><i>you can prevent this by setting a limit to how much data you'll allow the body to have. You can do this with Apache using the "LimitRequestBody" directive, but I think it's less confusing to just handle this on your nodejs server.</i>
-<br>
-<br>$> vim server.js
-<br>
-<br># edit server code, specifically the routes.post function: <a href="serverOverflow.js" target="_blank">cucomputerforge.com/s2/server.js</a>
-<br>
-<br># the added code basically says, if the body gets larger than 1MB, terminate the request.
-<br>
-<br><h3 style="color:blue">Any Other Types Of Attacks? (Inclusion Vulnerabilities)</h3>
-<br>
-<br><i>For the most part, SQL injection and XSS are the bigs ones. But, a third big one could be Inclusion Vulnerabilities, which is just when someone uses your site in a way you did not intend. There is no general way of preventing this. You should always think about what unintended ways a person could use any website functionality you create.</i>
-<br>
-<br><i>As an example, one type of attack is called an Open Redirect Attack.</i>
-<br>
-<br><i>Let's say you have a page that accepts a url as a get parameter & redirects to that particular url. A person might send a link to other people that looks safe because it's going to your site, they trust you ;) . but since it redirects, it will actually take them to an evil website!</i>
-<br>
-<br># your.domain/your/page<b>?redirecturl=evil.domain</b>
-<br>
-<br><i>seems kind of stupid, but it happens all the time.</i>
-<br>
-<br><h3 style="color:blue">Installing & Configuring UFW</h3>
-<br>
-<br># A firewall is just a program that allows you to set network rules, like only allow traffic on port 80 and only allow a certain IP address to access it.
-<br>
-<br>$> netstat -tupln
-<br>
-<br># Notice any ports being used, they are probably only 22 (ssh), 80 (http), 443 (https), and local 27017 (mongo)
-<br>
-<br>$> ufw enable
-<br>$> ufw allow 22
-<br>$> ufw allow 80
-<br>$> ufw allow 443
-<br>$> ufw allow proto tcp from 127.0.0.1 port 27017
-<br>$> ufw default deny incoming
-<br>
-<br># our rules say, allow anything on 22,80,443, allow connections to 27017 only from this computer (127.0.0.1), deny everything else
-<br>
-<br><h3 style="color:blue">Should You Disable Root?</h3>
-<br>
-<br><i>The idea of disabling root comes from the fact that servers usually come with a root user, so hackers know to brute force this. With the use of fail2ban, it's not so necessary to disable root.</i>
-<br>
-<br><i>If you're still paranoid about it (which is totally legit if you are), then either change the name of root or create a sudo user and disable root.</i>
-<br>
-<br># creating a sudo user and disabling root looks like this:
-<br>
-<br>$> useradd <b>username</b>
-<br>$> gpasswd -a <b>username</b> sudo
-<br>$> usermod -g sudo <b>username</b>
-<br>$> delgroup <b>username</b>
-<br>
-<br># logout and login as <b>username</b>
-<br>
-<br>$> sudo passwd -dl root
-<br>
-<br># changing the root user name looks like this:
-<br>
-<br>$> sudo usermod -l <b>username</b> root
-<br>
-<br><h3 style="color:blue">Any Last Words?</h3>
-<br>
-<br># A common saying in security is that anything can be hacked. In a way that's true. Nothing is impervious. The main point of security is to add so many layers that a hacker just says it's not worth their time. For every layer you put up, that's a layer they have to get past.
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br></body></html>
-<br>
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<style>
+			body { font-family: "Courier New", Courier, monospace; }
+			pre { white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; }
+		</style>
+	</head>
+	<body>
+		
+<pre>
 
+$> apt-get update
 
+<h3 style="color:blue">Install Fail2Ban:</h3>
 
+<i>Fail2Ban is software that helps prevent Brute Force attacks and DOS (denial of service) attacks.</i>
 
+<i>A Brute Force attack is when someone sends millions of passwords in attempt to log in as a user. Preventing this is a matter of locking a user's account after a number of failed log in attempts.</i>
+
+<i>A DOS attack, is when someone sends you way more requests than your server can handle, causing your server to drop requests, including legitimate ones, so regular people can't use your site/service.</i>
+
+$> apt-get install fail2ban
+$> cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+$> vim /etc/fail2ban/jail.local
+
+# edit fail2ban configuration, edit & add these entries: <a href="jail.local.txt" target="_blank">cucomputerforge.com/s2/jail.local</a>
+
+$> vim /etc/fail2ban/filter.d/http-dos.conf
+
+# paste in these contents: <a href="http-dos.conf" target="_blank">cucomputerforge.com/s2/http-dos.conf</a>
+
+$> service fail2ban restart
+
+<h3 style="color:blue">What About DDOS?</h3>
+
+<i>A DDOS (distributed denial of service, notice the extra "D") is the same as DOS except now the requests are coming from multiple IP addresses instead of one.</i>
+
+<i>DDOS attacks are rarer for small companies. To make a DDOS attack, means you need control of thousands if not millions of internet connected devices. So if you get hit by one, I would say "you pissed off the wrong person/people". Mitigating a DDOS attack is usually only something a large company can do as it requires some expensive purchases, such as having enough bandwidth to sustain the attack, site cacheing, DNS redirects, and a lot of rules and filters.</i>
+
+<i>A basic example of a rule that would be implemented in stopping a DDOS attack is this: Each request from the DDOS could be similar to one another if not the same, with only the IP address being different. So, you create a server that all traffic goes through that checks the requests. When you suddenly get a bunch that look the same, you blacklist them, but allow others to go to your final web server. Of course, the DDOS could use an algorithm to generate random looking requests, and you're off to add another filter.</i>
+
+<i>Here's a recent example of a DDOS attack: <a href="https://www.forbes.com/sites/thomasbrewster/2016/09/25/brian-krebs-overwatch-ovh-smashed-by-largest-ddos-attacks-ever/#375ad2195899" target="blank">A DDOS attack using IP cameras as an IoT</a></i>
+
+<h3 style="color:blue">Secure Apache:</h3>
+
+$> vim /etc/apache2/apache2.conf
+
+# edit apache configuration, edit these entries: <a href="apache2.conf" target="_blank">cucomputerforge.com/s2/apache2.conf</a>
+
+$> vim conf-enabled/security.conf
+
+# edit security configuration, edit these entries: <a href="security.conf" target="_blank">cucomputerforge.com/s2/security.conf</a>
+
+<h3 style="color:blue">Add TLS (HTTPS):</h3>
+
+# information about this can be found here: <a href="https://certbot.eff.org/" target="_blank">https://certbot.eff.org/</a>
+
+$> apt-get install python-letsencrypt-apache
+
+$> letsencrypt --apache -d <b>your.domain</b>
+
+$> crontab -e
+
+# edit cron configuration, should look like: <a href="cron.txt" target="_blank">cucomputerforge.com/s2/cron.txt</a>
+
+<h3 style="color:blue">Secure Mongo:</h3>
+
+$> mongo
+
+mongo> use admin
+mongo> db.createUser({user: "root", pwd: "<b>your password</b>", roles: [ "root" ]})
+mongo> exit
+
+$> service mongod stop
+
+$> vim /etc/mongod.conf
+
+# edit mongo configuration, change "security" to this: <a href="mongod.conf" target="_blank">cucomputerforge.com/s2/mongod.conf</a>
+
+$> service mongod restart
+
+$> mongo -u "root" -p "<b>your password</b>" --authenticationDatabase "admin"
+
+mongo> exit
+
+<h3 style="color:blue">Let's Hack Ourselves (Cross-Site Scripting XSS):</h3>
+
+$> node /var/www/server.js
+
+# Go to your website form and type in the following:
+
+&ltscript&gtalert("XSS Attack!");&lt/script&gt
+
+# The page should have reloaded, and now you receive a javascript alert box. Every person who visits your page will see it. A malicious user can thus insert unwanted javascript code for the purpose of gathering user data.
+
+<h3 style="color:blue">What Is Session Hijacking?</h3>
+
+<i>When you stay logged in on a website, the website knows it's still you by checking a "cookie" (a piece of data stored on your browser), for an authentication key. An XSS attack can try to steal your cookie and pretend like they're you.</i>
+
+<i>This is fairly easy to avoid today. If you use session cookies, make sure that the cookie is marked with "HttpOnly". That allows only server code to access the cookie. No client side javascript code can get to it.</i>
+
+<i>With expressjs, setting an HttpOnly cookies looks like this: response.cookie.httpOnly</i>
+
+<h3 style="color:blue">What Is SQL Injection?</h3>
+
+<i>Just like a user can insert malicious javascript code, SQL injection is the insertion of malicious SQL code, usually to mine for data.</i>
+
+<i>SQL drivers, the library you install to connect between your server and the database, come with functions to remove any potential SQL injection code. </i>
+
+<i>In Node, the mysql driver, comes with the function connection.escape(string)</i>
+
+<h3 style="color:blue">Preventing Cross-Site Scripting (XSS)</h3>
+
+<i>Preventing XSS is way more complicated than just removing &ltscript&gt tags. Checkout wikipedia for examples: <a href="https://en.wikipedia.org/wiki/Cross-site_scripting#Preventive_measures" target="_blank">wiki</a>. We'll use a package to prevent XSS.</i>
+
+$> cd /var/www
+$> npm install sanitize-html
+
+$> vim server.js
+
+# edit server code, specifically the routes.post function: <a href="server.js" target="_blank">cucomputerforge.com/s2/server.js</a>
+
+$> mongo
+
+mongo> use data
+mongo> db.posts.drop();
+mongo> exit
+
+# restart your nodejs server
+
+$> node /var/www/server.js
+
+# now go back to your website & try posting this:
+
+&ltscript&gtalert("XSS Attack!");&lt/script&gt and something else
+
+# if all went well, you should only see "and something else" by your mongo _id. sanitize-html should have removed the the &ltscript&gt tags and everything between them.
+
+<h3 style="color:blue">Preventing Overflow Attacks</h3>
+
+<i>an overflow attack is where someone sends you so much data that the memory of your computer runs out and crashes. When a person makes a request for your server, that request has headers and a body. That body can be as big as the user wants and your server will just keep receiving the body data until it crashes.</i>
+
+<i>you can prevent this by setting a limit to how much data you'll allow the body to have. You can do this with Apache using the "LimitRequestBody" directive, but I think it's less confusing to just handle this on your nodejs server.</i>
+
+$> vim server.js
+
+# edit server code, specifically the routes.post function: <a href="serverOverflow.js" target="_blank">cucomputerforge.com/s2/server.js</a>
+
+# the added code basically says, if the body gets larger than 1MB, terminate the request.
+
+<h3 style="color:blue">Any Other Types Of Attacks? (Inclusion Vulnerabilities)</h3>
+
+<i>For the most part, SQL injection and XSS are the bigs ones. But, a third big one could be Inclusion Vulnerabilities, which is just when someone uses your site in a way you did not intend. There is no general way of preventing this. You should always think about what unintended ways a person could use any website functionality you create.</i>
+
+<i>As an example, one type of attack is called an Open Redirect Attack.</i>
+
+<i>Let's say you have a page that accepts a url as a get parameter & redirects to that particular url. A person might send a link to other people that looks safe because it's going to your site, they trust you ;) . but since it redirects, it will actually take them to an evil website!</i>
+
+# your.domain/your/page<b>?redirecturl=evil.domain</b>
+
+<i>seems kind of stupid, but it happens all the time.</i>
+
+<h3 style="color:blue">Installing & Configuring UFW</h3>
+
+# A firewall is just a program that allows you to set network rules, like only allow traffic on port 80 and only allow a certain IP address to access it.
+
+$> netstat -tupln
+
+# Notice any ports being used, they are probably only 22 (ssh), 80 (http), 443 (https), and local 27017 (mongo)
+
+$> ufw enable
+$> ufw allow 22
+$> ufw allow 80
+$> ufw allow 443
+$> ufw allow proto tcp from 127.0.0.1 port 27017
+$> ufw default deny incoming
+
+# our rules say, allow anything on 22,80,443, allow connections to 27017 only from this computer (127.0.0.1), deny everything else
+
+<h3 style="color:blue">Should You Disable Root?</h3>
+
+<i>The idea of disabling root comes from the fact that servers usually come with a root user, so hackers know to brute force this. With the use of fail2ban, it's not so necessary to disable root.</i>
+
+<i>If you're still paranoid about it (which is totally legit if you are), then either change the name of root or create a sudo user and disable root.</i>
+
+# creating a sudo user and disabling root looks like this:
+
+$> useradd <b>username</b>
+$> gpasswd -a <b>username</b> sudo
+$> usermod -g sudo <b>username</b>
+$> delgroup <b>username</b>
+
+# logout and login as <b>username</b>
+
+$> sudo passwd -dl root
+
+# changing the root user name looks like this:
+
+$> sudo usermod -l <b>username</b> root
+
+<h3 style="color:blue">Any Last Words?</h3>
+
+# A common saying in security is that anything can be hacked. In a way that's true. Nothing is impervious. The main point of security is to add so many layers that a hacker just says it's not worth their time. For every layer you put up, that's a layer they have to get past.
+
+</pre>
+
+<br><br><br><br><br><br><br><br><br><br><br>
+
+	</body>
+</html>

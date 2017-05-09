@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<style>
+			body { font-family: "Courier New", Courier, monospace; }
+			pre { white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; }
+		</style>
+	</head>
+	<body>
+
+<pre>
+
+$> apt-get update
+
+<h3 style="color:blue">Install Docker:</h3>
+
+<i>Docker is a container manager. Containers offer 2 big advantages. 1st, they are a way to package your software with whatever operating system dependencies and configuration they need (for example: user accounts and operating system packages). 2nd, they separate your software from other software running on the same VM.</i>
+
+<i>Important: Containers are not an alternative to VMs. Containers run on top of VMs. Containers spin up very quickly because they all share the VMs resources. <b>The VM the container runs on is known as the "host".</b></i>
+
+# installation instructions: <a href="https://store.docker.com/editions/community/docker-ce-server-ubuntu?tab=description" target="_blank">https://store.docker.com/editions/community/docker-ce-server-ubuntu?tab=description</a>
+
+$> apt-get -y install apt-transport-https ca-certificates curl
+$> curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+$> add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+$> apt-get -y install docker-ce
+
+<h3 style="color:blue">Important Docker Concepts:</h3>
+
+<b>This section might be abstract and not make sense on your first reading. After running this seminar's commands, you should reread this section as it should then make more sense.</b>
+
+<i>Images are basically the saved version. When you run an image, it becomes a container. You can pull & push images from DockerHub, the same way you push & pull repos from GitHub. DockerHub even keeps track of image versions like a version control system would.</i>
+
+<i>When you run a docker image, it will immediately run and stop. To keep it running, you have to run in "detach" mode using the -d flag. Then you can enter, exit, start, restart, and stop the container as you like.</i>
+
+<i>You can run programs inside of a container with "docker exec". That's even how you enter a container, by running one of it's shell programs, like bash. In order for that to work though, you need to use the -i and -t flags, which allow the container to accept the host's stdin stream &amp; open a terminal, respectively.</i>
+
+<i>The goal of Docker is typically to run a container, set it up the way you need it, and then save it as an image, which can then be run at anytime without the need of any configuration.</i>
+
+<i>Since containers share the host VM's resources, they must all share the host's network ports with port mapping. For example, let's say an http connection is sent to the host on port 80. We can map that port to the containers 8080 port with this: -p 80:8080. Now, inside the container, your server software can listen on port 8080 for the connection.</i>
+
+<h3 style="color:blue">Download, List, & Tag Images:</h3>
+
+$> docker pull ubuntu
+$> docker pull mongo
+$> docker images
+$> docker tag IMAGE-ID cucf/node
+$> docker tag IMAGE-ID cucf/mongo
+
+<h3 style="color:blue">Start & Configure Mongo Container:</h3>
+
+$> docker run -i -t -d -p 2017:27017 --name cucf-mongo cucf/mongo --auth
+$> docker exec -it cucf-mongo mongo admin
+mongo> db.createUser({user:'root',pwd:'MONGO-ADMIN-PASSWORD',roles:["root"]});
+mongo> exit
+$> docker exec -it appsys-mongo mongo -u root -p "MONGO-ADMIN-PASSWORD" admin
+mongo> use cucf
+mongo> db.createUser({user:"appsys",pwd:"MONGO-USER-PASSWORD",roles:["dbOwner"]})
+mongo> exit
+
+<h3 style="color:blue">Start, Update, Commit, & Remove Node Container:</h3>
+
+$> docker run -i -t -d -p 2080:80 -p 2443:443 --link cucf-mongo:cucf-mongo --name cucf-node cucf/node
+$> docker exec -it cucf-node bash
+bash> // TO DO: install basic node server to test link with mongo container
+$> docker ps -a --format "table {{.ID}}\t{{.Image}}\t{{.Ports}}"
+$> docker commit -m "a commit message" CONTAINER-ID cucf/node
+$> docker stop CONTAINER-ID
+$> docker rm CONTAINER-ID
+
+<h3 style="color:blue">Start &amp; Run Updated Node Container:</h3>
+
+docker run -i -t -d -p 2080:80 -p 2443:443 --link cucf-mongo:cucf-mongo --name cucf-node cucf/node
+docker exec -it cucf-node service apache2 start
+
+<h3 style="color:blue">Using Docker For Development:</h3>
+
+<i>Docker is a great way for multiple developers to work on the same project from different computers, since the container keeps everything the same on everyone's computers. Probably the most important command you'll need for this is "docker cp". Using that command, you can edit files on your host computer using your preferred IDE, and then copy those files onto a running docker container for testing.</i>
+
+<h3 style="color:blue">Further Steps:</h3>
+
+<i>You can get familiar with all the docker commands at the link below</i>
+
+# docker commands: <a href="https://docs.docker.com/engine/reference/commandline/docker/" target="_blank">https://docs.docker.com/engine/reference/commandline/docker/</a>
+
+<i>Another important Docker tool is known as Dockerfiles. These files are basically like shell scripts for Docker. Instead of typing in Docker commands in a terminal, you can run a Dockerfile that runs all those commands for you.</i>
+
+<i>Dockerfiles are typically used to create a single container. You can then use the Docker Compose tool, which reads yaml files, to create multiple containers that work together.</i>
+
+</pre>
+
+<br><br><br><br><br><br><br><br><br><br><br>
+
+	</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>
