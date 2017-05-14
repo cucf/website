@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<style>
+			body { font-family: "Courier New", Courier, monospace; }
+			pre { white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; }
+		</style>
+	</head>
+	<body>
+
+<pre>
+
+<h3 style="color:blue">Important Concepts:</h3>
+
+<i>A shell is a program that allows you to communicate with a computer with your keyboard. the terminal, is a historical term referring to the actual screen the shell was run on. today, the terminal refers to the window that opens up. you can change shells inside a terminal window.
+
+Mac & Linux typically run the BASH shell by default, but there are many others. Each have different syntax and powers. You can determine which shell you are running with: echo $SHELL
+
+Your <b>local machine</b> is the computer in front of you, the one you physically interact with. Your <b>remote machine</b> is a computer somewhere on the internet that you connect to.
+
+SSH stands for Secure Shell. It is a way to "login" to a remote machine. It runs a shell on the remote machine and allows you to control it. Usually, you need to provide either a password or a key to use SSH. This seminar will go over using a key, the most secure way of interacting with SSH.</i>
+
+<h3 style="color:blue">Creating A Key:</h3>
+
+<i>ssh-keygen creates an ssh key pair for logging into machines. It generates two files, a private key file and a public key file. the private key file is stored on your computer and should never be shared. the public key file is put on any machine you want to log in on.</i>
+
+ssh-keygen
+	-t	:: the type of encryption to use, rsa is more universally supported
+	-C	:: a comment, typically used to identify what the key was generated for
+	-b	:: number of bits for the key, more bits equals more secure
+	-o	:: use new OpenSSH format instead of old PEM format, supports -a flag below
+	-a	:: number of key generations (see below)
+	
+<i>The KDF (Key Derivation Function) creates the ssh key. You can run it multiple times to make key generation slower. Each run generates a different key, but those keys are always the same based on the number of runs. In other words, the key generated at the 5th run is always the same, but different from the 6th run, etc. Why would you want to make key generation slower? To also slow down brute force attacks. Everytime a hacker wants to test a password, they have to generate the key. If you have to run the KDF 100 times to generate the key, that will make each attempt 100 times slower. For us, that's no big deal. It just makes something that takes a few milliseconds now take a few hundred milliseconds (still less than a second). But for a brute force attack, where the hacker is trying every concievable password, 100 times slower means the attack goes from taking 1 day to 100 days.</i>
+	
+by default, ssh-keygen will:
+	use this key file: ~/.ssh/id_rsa
+	use 2046 bits
+	use only 1 KDF iteration
+	your machine's user name & host name
+
+# here is an example command that generates a strong key pair:
+$> ssh-keygen -t rsa -C "computer forge kubernetes key" -b 4096 -o -a 100 -f ~/.ssh/forge
+
+<h3 style="color:blue">Getting Key On Remote Machine:</h3>
+
+<i>Hosts, like Digital Ocean, give you the option of adding your public ssh key to your account. Then, when you spin up a VM, they give you the option of adding your ssh key automatically.</i>
+
+<i>If you already have SSH access, and you want to add a new SSH key, you can do so by adding the public key to this directory: ~/.ssh/</i>
+
+# this will add the ssh key for the user that already has access
+$> ssh-copy-id -i PATH-TO-PUBLIC-KEY USERNAME@IP-ADDRESS
+
+# this will append an ssh key for the user you specify (assumes you're copying to linux machine)
+$> cat PATH-TO-PUBLIC-KEY | ssh USERNAME@IP-ADDRESS "mkdir -p /home/USERNAME/.ssh && cat >>  /home/USERNAME/.ssh/authorized_keys"
+
+# you can also try the scp command, but you might accidentally overwrite existing keys if they exist
+
+<h3 style="color:blue">Logging In With SSH:</h3>
+
+# after copying the public key to a machine, you log in like this:
+$> ssh USER-NAME@DOMAIN-NAME -i PATH-TO-PRIVATE-KEY
+
+# to simplify ssh logins, you can edit ~/.ssh/config
+
+Host NAME
+    HostName DOMAIN-NAME
+    Port PORT-NUMBER (optional, defaults to port 22 if not present)
+    User USER-NAME
+    IdentityFile PATH-TO-PRIVATE-KEY
+
+# now, if you type below, it will actually run: ssh USER-NAME@DOMAIN-NAME -p PORT-NUMBER -i PATH-TO-PRIVATE-KEY
+$> ssh NAME
+
+
+</pre>
+
+<br><br><br><br><br><br><br><br><br><br><br>
+
+	</body>
+</html>

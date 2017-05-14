@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<style>
+			body { font-family: "Courier New", Courier, monospace; }
+			pre { white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; }
+		</style>
+	</head>
+	<body>
+
+<pre>
+	
+<h3 style="color:blue">Why Kubernetes?:</h3>
+
+1. kubernetes automates scaling, which is increasing VM resources for your application
+
+<h3 style="color:blue">Important Concepts:</h3>
+
+1. a VM is a called a node
+2. multiple connected nodes create a cluster
+3. one node must be a master, which controls the other nodes in the cluster
+
+1. a kubernetes cluster is just a blank group of VMs that are connected with kubernetes
+2. once you create a cluster, you can deploy your applications on to it
+3. kubernetes makes it easy to scale your app by increasing the number of nodes running your app when needed
+
+1. clusters require private networks, which are a set of IP addresses
+2. the private IP addresses are used for nodes on a cluster
+3. we will use a software called "flannel" to create a virtual private network for our cluster
+
+<h3 style="color:blue">List Of Kubernetes Tools:</h3>
+
+<i>Kubernetes comes with several tools. The most important are kubectl & kubadm. There are tons of custom tools to make things easier, but having a foundation in how these core tools work is important.</i>
+
+kubectl: control a cluster
+kubeadm: create a cluster
+kubefed: share resources between multiple clusters
+minikube: used for learning purposes, only creates and controls a single node cluster
+
+<h3 style="color:blue">Install doctl & kubectl on local machine:</h3>
+
+# install doctl for mac/linux, instructions: <a href="https://github.com/digitalocean/doctl">doctl</a>
+$> curl -OL https://github.com/digitalocean/doctl/releases/download/v1.6.0/doctl-1.6.0-darwin-10.6-amd64.tar.gz
+$> tar xf ./doctl-1.6.0-darwin-10.6-amd64.tar.gz
+$> mv ~/doctl /usr/local/bin
+
+# install kubectl for mac/linux, instructions: <a href="https://kubernetes.io/docs/getting-started-guides/kubeadm/">kubectl</a>
+$> curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/darwin/amd64/kubectl
+$> chmod +x ./kubectl
+$> mv ./kubectl /usr/local/bin
+
+# check that installation succeeded
+$> kubectl version
+$> doctl version
+
+<h3 style="color:blue">Set Up For Digital Ocean & Kubernetes:</h3>
+
+<i>Go to your digital ocean account, open the API tab, create a token & save it in a secure place. Log in by running the command below & paste your token in when it asks for it.</i>
+
+$> doctl auth init
+
+# create an ssh key pair & add the public key to your digital ocean account
+$> ssh-keygen -t rsa -C "computer forge kubernetes key" -b 4096 -o -a 100 -f ~/.ssh/forge
+$> doctl compute ssh-key import k8s-ssh --public-key-file ~/.ssh/forge.pub
+
+# save your ssh key digital ocean ID and fingerprint as a shell variables
+$> SSH_ID=`doctl compute ssh-key list | grep "k8s-ssh" | cut -d' ' -f1`
+$> SSH_KEY=`doctl compute ssh-key get $SSH_ID --format FingerPrint --no-header`
+
+# create digital ocean tags
+$> doctl compute tag create k8s-master
+$> doctl compute tag create k8s-node
+
+# !! IMPORTANT, create a token and replace it in master.sh & node.sh
+# the token will be set on the master. nodes will join the cluster by giving the master this token.
+$> TOKEN=`python -c 'import random; print "%0x.%0x" % (random.SystemRandom().getrandbits(3*8), random.SystemRandom().getrandbits(8*8))'`
+
+<h3 style="color:blue">Create The Master VM:</h3>
+
+# this create our Digital Ocean VM & runs master.sh on it
+$> doctl compute droplet create forge-master \
+--region sfo1 \
+--image ubuntu-16-04-x64 \
+--size 512mb \
+--tag-name k8s-master \
+--ssh-keys $SSH_KEY \
+--user-data-file  ./master.sh \
+--wait
+
+<h3 style="color:blue">Get Master VM Info:</h3>
+
+$> MASTER_ID=`doctl compute droplet list | grep "master" |cut -d' ' -f1`
+$> MASTER_IP=`doctl compute droplet get $MASTER_ID --format PublicIPv4 --no-header`
+
+# make sure to replace MASTER_IP with the actual value
+$> scp -i ~/.ssh/forge root@$MASTER_IP:/etc/kubernetes/admin.conf .
+
+# if everything went well, you should see the master (might take 10 minutes for master.sh to finish)
+$> kubectl --kubeconfig ./admin.conf get nodes
+
+<h3 style="color:blue">Create Node VMs:</h3>
+
+# this create two Digital Ocean VMs & runs node.sh on each of them
+doctl compute droplet create forge-node1 forge-node2 \
+--region sfo1 \
+--image ubuntu-16-04-x64 \
+--size 512mb \
+--tag-name k8s-node \
+--ssh-keys $SSH_KEY \
+--user-data-file  ./node.sh \
+--wait
+
+# if everything went well, you should see the master and the 2 nodes (might take 10 minutes for node.sh to finish)
+$> kubectl --kubeconfig ./admin.conf get nodes
+
+<h3 style="color:blue">Deploy Test Application:</h3>
+
+$> kubectl --kubeconfig ./admin.conf create -f /// TODO: .yaml file
+
+
+
+<h3 style="color:blue">Final Notes:</h3>
+
+# clean up
+unset TOKEN
+unset SSH_ID
+unset SSH_KEY
+unset MASTER_ID
+unset MASTER_IP
+
+# check kubernetes cluster
+kubectl --kubeconfig ./admin.conf get nodes
+kubectl --kubeconfig ./admin.conf get pods
+kubectl --kubeconfig ./admin.conf get svc
+
+</pre>
+
+<br><br><br><br><br><br><br><br><br><br><br>
+
+	</body>
+</html>

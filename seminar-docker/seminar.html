@@ -10,35 +10,39 @@
 	<body>
 
 <pre>
+	
+<h3 style="color:blue">Why Docker?:</h3>
 
-$> apt-get update
+1. packages your application with the environment it needs, like user accounts and OS packages
+2. they separate your application from other software that has different needs, like your database
+
+!! Important: containers are not an alternative to VMs, they run on top of them. <b>The VM the container runs on is known as the "host".</b>
+	
+<h3 style="color:blue">Important Docker Concepts:</h3>
+
+1. images are saved environments. when you run an image, it becomes a container.
+2. when you run a docker image, it will run & stop. to keep it running, use detach option: -d
+3. just like git & GitHub, images have version control and the web repo DockerHub.
+
+1. docker containers are designed to just run a program with an environment, so "logging in" is different than a VM
+2. to "log in", we run: docker exec -i -t CONTAINER-NAME bash
+	bash: runs the container's bash shell
+	-t: opens a new terminal
+	-i: allows the container to accept stdin from your terminal
+
+1. containers share a VMs resources. you'll notice this the most with networking.
+2. to send traffic to a docker container requires mapping a host port to the continaers port: -p HOST-PORT:CONTAINER-PORT
 
 <h3 style="color:blue">Install Docker:</h3>
 
-<i>Docker is a container manager. Containers offer 2 big advantages. 1st, they are a way to package your software with whatever operating system dependencies and configuration they need (for example: user accounts and operating system packages). 2nd, they separate your software from other software running on the same VM.</i>
-
-<i>Important: Containers are not an alternative to VMs. Containers run on top of VMs. Containers spin up very quickly because they all share the VMs resources. <b>The VM the container runs on is known as the "host".</b></i>
-
 # installation instructions: <a href="https://store.docker.com/editions/community/docker-ce-server-ubuntu?tab=description" target="_blank">https://store.docker.com/editions/community/docker-ce-server-ubuntu?tab=description</a>
+
+$> apt-get update
 
 $> apt-get -y install apt-transport-https ca-certificates curl
 $> curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 $> add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 $> apt-get -y install docker-ce
-
-<h3 style="color:blue">Important Docker Concepts:</h3>
-
-<b>This section might be abstract and not make sense on your first reading. After running this seminar's commands, you should reread this section as it should then make more sense.</b>
-
-<i>Images are basically the saved version. When you run an image, it becomes a container. You can pull & push images from DockerHub, the same way you push & pull repos from GitHub. DockerHub even keeps track of image versions like a version control system would.</i>
-
-<i>When you run a docker image, it will immediately run and stop. To keep it running, you have to run in "detach" mode using the -d flag. Then you can enter, exit, start, restart, and stop the container as you like.</i>
-
-<i>You can run programs inside of a container with "docker exec". That's even how you enter a container, by running one of it's shell programs, like bash. In order for that to work though, you need to use the -i and -t flags, which allow the container to accept the host's stdin stream &amp; open a terminal, respectively.</i>
-
-<i>The goal of Docker is typically to run a container, set it up the way you need it, and then save it as an image, which can then be run at anytime without the need of any configuration.</i>
-
-<i>Since containers share the host VM's resources, they must all share the host's network ports with port mapping. For example, let's say an http connection is sent to the host on port 80. We can map that port to the containers 8080 port with this: -p 80:8080. Now, inside the container, your server software can listen on port 8080 for the connection.</i>
 
 <h3 style="color:blue">Download, List, & Tag Images:</h3>
 
@@ -63,7 +67,9 @@ mongo> exit
 
 $> docker run -i -t -d -p 2080:80 -p 2443:443 --link cucf-mongo:cucf-mongo --name cucf-node cucf/node
 $> docker exec -it cucf-node bash
-bash> // TO DO: install basic node server to test link with mongo container
+
+bash> /// TODO: install basic node server to test link with mongo container
+
 $> docker ps -a --format "table {{.ID}}\t{{.Image}}\t{{.Ports}}"
 $> docker commit -m "a commit message" CONTAINER-ID cucf/node
 $> docker stop CONTAINER-ID
@@ -84,9 +90,11 @@ docker exec -it cucf-node service apache2 start
 
 # docker commands: <a href="https://docs.docker.com/engine/reference/commandline/docker/" target="_blank">https://docs.docker.com/engine/reference/commandline/docker/</a>
 
-<i>Another important Docker tool is known as Dockerfiles. These files are basically like shell scripts for Docker. Instead of typing in Docker commands in a terminal, you can run a Dockerfile that runs all those commands for you.</i>
+<i>Another important Docker tool is known as the Dockerfile. These files are basically like shell scripts for Docker. Instead of typing in Docker commands in a terminal, you can run a Dockerfile that runs all those commands for you.</i>
 
 <i>Dockerfiles are typically used to create a single container. You can then use the Docker Compose tool, which reads yaml files, to create multiple containers that work together.</i>
+
+# docker compose: <a href="https://docs.docker.com/compose/" target="_blank">https://docs.docker.com/compose/</a>
 
 </pre>
 
