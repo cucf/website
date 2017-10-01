@@ -1,6 +1,7 @@
-New and aspiring members: Make a pull request adding your school email (first.last@colorado.edu format ONLY) 
-
-**no identikey emails please!**
+# For new and aspiring members:
+#   - please make a pull request adding your name and email to this file
+#   - the email should be in first.last@colorado.edu format ONLY
 
 kylee.bennett@colorado.edu
 spencer.hanson@colorado.edu
+evan.su@colorado.edu

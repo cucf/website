@@ -1,11 +1,14 @@
-# Computer-Forge
+## CloudForge
 
-The Computer Forge @ CU is a student organization dedicated to project development and teaching members about cloud computing.
+The CloudForge is a student organization at the University of Colorado,
+Boulder that's dedicated to both project development, and teaching members about
+systems administration, cloud computing and development operations.
 
-We host seminars to learn about related technologies & use our Gitter chatroom to share events and help each other.
+We host seminars periodically to review modern computer science technologies, as
+well as share projects and events that are currently happening.
 
-Members also get access to resources we have with the university, like VMs through our OpenStack cloud.
+If you're a student attending CU, please make a pull request in `MEMBERS.txt`
+with your school email address, and we'll get in touch with!
 
-If you would like to join, make a pull request adding your school email to the MEMBERS file.
-
-[![Join the chat at https://gitter.im/Computer-Forge/Lobby](https://badges.gitter.im/Computer-Forge/Lobby.svg)](https://gitter.im/Computer-Forge/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+We also have a public [Slack](https://cucf.slack.com/) that you can join. Please
+use your CU email and full name when signing up for the Slack.
